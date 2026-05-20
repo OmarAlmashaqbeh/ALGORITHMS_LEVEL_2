@@ -42,7 +42,7 @@ int main()
 {
 	srand((unsigned)time(NULL));
 	int ar[100];
-	int size = readNumber("Enter the size of thr array");
+	int size = readNumber("Enter the size of the array");
 	fillArrayRandomly(ar, size);
 	printArray(ar, size);
 	cout << "\nAverage of all Numbers is : " << arrayAverage(ar, size) << endl;

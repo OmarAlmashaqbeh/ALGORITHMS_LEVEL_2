@@ -41,7 +41,7 @@ void checkNumber(int ar[], int size, int num)
 int main()
 {
 	int ar[100];
-	int size = readNumber("Enter the size of thr array");
+	int size = readNumber("Enter the size of the array");
 	fillArray(ar, size);
 	int numberToCheck = readNumber("\nEnter the number you want to check:");
 	printArray(ar, size);

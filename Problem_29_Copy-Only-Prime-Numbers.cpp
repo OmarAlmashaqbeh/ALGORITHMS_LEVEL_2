@@ -56,7 +56,7 @@ int main()
 {
 	srand((unsigned)time(NULL));
 	int ar1[100], ar2[100];
-	int size1 = readNumber("Enter the size of thr array");
+	int size1 = readNumber("Enter the size of the array");
 	int size2 = 0;
 	fillArrayRandomly(ar1, size1);
 	printArray(ar1, size1, "\nArray 1 elements:");

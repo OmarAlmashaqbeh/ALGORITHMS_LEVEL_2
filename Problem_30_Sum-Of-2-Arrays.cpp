@@ -40,7 +40,7 @@ int main()
 {
 	srand((unsigned)time(NULL));
 	int ar1[100], ar2[100], ar3[100];
-	int size = readNumber("Enter the size of thr array");
+	int size = readNumber("Enter the size of the array");
 	fillArrayRandomly(ar1, size);
 	printArray(ar1, size, "\nArray 1 elements:");
 	fillArrayRandomly(ar2, size);

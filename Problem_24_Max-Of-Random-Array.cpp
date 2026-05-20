@@ -45,7 +45,7 @@ int main()
 {
 	srand((unsigned)time(NULL));
 	int ar[100];
-	int size = readNumber("Enter the size of thr array");
+	int size = readNumber("Enter the size of the array");
 	fillArrayRandomly(ar, size);
 	printArray(ar, size);
 	cout << "\nMax Number is : " << maxNumberInArray(ar, size) << endl;
