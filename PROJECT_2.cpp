@@ -10,21 +10,24 @@ enum enQuestionLevel { Easy = 1, Med = 2, Hard = 3, MixLevel = 4 };
 enum enOpType { Add = 1, Sub = 2, Mul = 3, Div = 4, MixOp = 5 };
 enum enFinalResult { PASS = 1, FAIL = 2 };
 
-struct stQuestionInfo
+struct stQuestion
 {
     enQuestionLevel questionLevel;
+    enOpType opType;
     short num1;
     short num2;
-    enOpType opType;
-    enFinalResult result;
+    int correctAnswer;
+    int playerAnswer;
+    bool answerResult = false;
 };
 struct stGameResults
 {
-    short numberOfQuestion;
+    stQuestion questionList[100];
+    short numberOfQuestions;
     enQuestionLevel questionLevel;
     enOpType opType;
-    short numberOfRightAnswers;
-    short numberOfWrongAnswers;
+    short numberOfRightAnswers = 0;
+    short numberOfWrongAnswers = 0;
     enFinalResult finalResult;
 };
 
@@ -44,32 +47,32 @@ void resetScreen()
     system("cls");
     system("color 07");
 }
-short readHowManyQuestions(string text)
+short readHowManyQuestions()
 {
     short num;
     do
     {
-        cout << text;
+        cout << "How many questions do you want to answer ? ";
         cin >> num;
     } while (num <= 0);
     return num;
 }
-enQuestionLevel readQuestionsLevel(string text)
+enQuestionLevel readQuestionsLevel()
 {
     short num;
     do
     {
-        cout << text;
+        cout << "Enter questions level [1] Easy, [2] Med, [3] Hard, [4] Mix ? ";
         cin >> num;
     } while (num <= 0 || num > 4);
     return (enQuestionLevel)num;
 }
-enOpType readOpType(string text)
+enOpType readOpType()
 {
     short num;
     do
     {
-        cout << text;
+        cout << "Enter operation type [1] Add, [2] Sub, [3] Mul, [4] Div, [5] Mix ? ";
         cin >> num;
     } while (num <= 0 || num > 5);
     return (enOpType)num;
@@ -96,11 +99,11 @@ short getRandomNumberForTheLevel(enQuestionLevel questionLevel)
     switch (questionLevel)
     {
     case Easy:
-        return getRandomNumber(1, 9);
+        return getRandomNumber(1, 10);
     case Med:
-        return getRandomNumber(10, 40);
+        return getRandomNumber(10, 50);
     case Hard:
-        return getRandomNumber(41, 99);
+        return getRandomNumber(50, 100);
     default:
         return getRandomNumberForTheLevel(getRandomLevel());
     }
@@ -109,86 +112,27 @@ enOpType getRandomOpType()
 {
     return (enOpType)getRandomNumber(1, 4);
 }
-short calculateQuestionAnswer(short num1, short num2, enOpType opType)
+short calculateQuestionAnswer(stQuestion questionInfo)
 {
-    switch (opType)
+    switch (questionInfo.opType)
     {
     case enOpType::Add:
-        return num1 + num2;
+        return questionInfo.num1 + questionInfo.num2;
     case enOpType::Sub:
-        return num1 - num2;
+        return questionInfo.num1 - questionInfo.num2;
     case enOpType::Mul:
-        return num1 * num2;
+        return questionInfo.num1 * questionInfo.num2;
     case enOpType::Div:
-        return num1 / num2;
+        return questionInfo.num1 / questionInfo.num2;
     default:
         return 0;
     }
 }
-short readUserAnswer()
+short readPlayerAnswer()
 {
     short num;
     cin >> num;
     return num;
-}
-void startQuestion(stQuestionInfo& questionInfo, short& numberOfRightAnswers, short& numberOfWrongAnswers)
-{
-    enQuestionLevel currentLevel = (questionInfo.questionLevel == enQuestionLevel::MixLevel) ? getRandomLevel() : questionInfo.questionLevel;
-    enOpType currentOpType = (questionInfo.opType == MixOp) ? getRandomOpType() : questionInfo.opType;
-    questionInfo.num1 = getRandomNumberForTheLevel(currentLevel);
-    questionInfo.num2 = getRandomNumberForTheLevel(currentLevel);
-    short rightAnswer = calculateQuestionAnswer(questionInfo.num1, questionInfo.num2, currentOpType);
-    cout << "\n" << questionInfo.num1 << "\n";
-    cout << questionInfo.num2 << " " << getOpTypeSymbol(currentOpType) << "\n";
-    cout << "___________\n";
-    short userAnswer = readUserAnswer();
-    if (userAnswer == rightAnswer)
-    {
-        system("color 27");
-        cout << "Right answer :-)" << endl;
-        numberOfRightAnswers++;
-    }
-    else
-    {
-        system("color 47");
-        cout << "Wrong answer :-(\n";
-        cout << "The right answer is: " << rightAnswer << endl;
-        numberOfWrongAnswers++;
-    }
-}
-enFinalResult getFinalGameResult(short numberOfRightAnswers, short numberOfWrongAnswers)
-{
-    if (numberOfRightAnswers >= numberOfWrongAnswers)
-    {
-        return enFinalResult::PASS;
-    }
-    return enFinalResult::FAIL;
-}
-stGameResults fillGameResults(short numberOfQuestions, enQuestionLevel questionLevel, enOpType opType, short numberOfRightAnswers, short numberOfWrongAnswers)
-{
-    stGameResults gameResults;
-
-    gameResults.numberOfQuestion = numberOfQuestions;
-    gameResults.questionLevel = questionLevel;
-    gameResults.opType = opType;
-    gameResults.numberOfRightAnswers = numberOfRightAnswers;
-    gameResults.numberOfWrongAnswers = numberOfWrongAnswers;
-    gameResults.finalResult = getFinalGameResult(numberOfRightAnswers, numberOfWrongAnswers);
-
-    return gameResults;
-}
-stGameResults playGame(short numberOfQuestions, enQuestionLevel questionLevel, enOpType opType)
-{
-    stQuestionInfo questionInfo;
-    questionInfo.questionLevel = questionLevel;
-    questionInfo.opType = opType;
-    short numberOfRightAnswer = 0, numberOfWrongAnswer = 0;
-    for (short questionNumber = 1; questionNumber <= numberOfQuestions; questionNumber++)
-    {
-        cout << "\nQuestion [" << questionNumber << "/" << numberOfQuestions << "]\n";
-        startQuestion(questionInfo, numberOfRightAnswer, numberOfWrongAnswer);
-    }
-    return fillGameResults(numberOfQuestions, questionLevel, opType, numberOfRightAnswer, numberOfWrongAnswer);
 }
 string getFinalGameResultHeader(enFinalResult finalResult)
 {
@@ -198,15 +142,65 @@ string getFinalGameResultHeader(enFinalResult finalResult)
     }
     return " Final Result is FAIL :-(";
 }
-void showGameOverScreen(enFinalResult finalResult)
+void startQuestion(stQuestion& questionInfo)
+{
+    cout << questionInfo.num1 << "\n";
+    cout << questionInfo.num2 << " " << getOpTypeSymbol(questionInfo.opType) << "\n";
+    cout << "_________\n";
+    questionInfo.playerAnswer = readPlayerAnswer();
+    if (questionInfo.playerAnswer == questionInfo.correctAnswer)
+    {
+        system("color 27");
+        cout << "Right Answer :-)" << endl;
+        questionInfo.answerResult = true;
+    }
+    else
+    {
+        system("color 47");
+        cout << "Wrong Answer :-(\n";
+        cout << "The Right Answer is: " << questionInfo.correctAnswer << endl;
+        questionInfo.answerResult = false;
+    }
+}
+void playMathGame(stGameResults& gameResults)
+{
+    for (short i = 0; i < gameResults.numberOfQuestions; i++)
+    {
+        gameResults.questionList[i].questionLevel = (gameResults.questionLevel == enQuestionLevel::MixLevel) ? getRandomLevel() : gameResults.questionLevel;
+        gameResults.questionList[i].opType = (gameResults.opType == enOpType::MixOp) ? getRandomOpType() : gameResults.opType;
+        gameResults.questionList[i].num1 = getRandomNumberForTheLevel(gameResults.questionList[i].questionLevel);
+        gameResults.questionList[i].num2 = getRandomNumberForTheLevel(gameResults.questionList[i].questionLevel);
+        gameResults.questionList[i].correctAnswer = calculateQuestionAnswer(gameResults.questionList[i]);
+        cout << "\nQuestion [" << i + 1 << "/" << gameResults.numberOfQuestions << "]\n" << endl;
+        startQuestion(gameResults.questionList[i]);
+        if (gameResults.questionList[i].answerResult)
+        {
+            gameResults.numberOfRightAnswers++;
+        }
+        else
+        {
+            gameResults.numberOfWrongAnswers++;
+        }
+    }
+    if (gameResults.numberOfRightAnswers >= gameResults.numberOfWrongAnswers)
+    {
+        gameResults.finalResult = enFinalResult::PASS;
+    }
+    else
+    {
+        gameResults.finalResult = enFinalResult::FAIL;
+    }
+}
+void printGameOverScreenHeader(enFinalResult finalResult)
 {
     cout << "\n__________________________________________\n";
     cout << "\n" << getFinalGameResultHeader(finalResult) << "\n";
     cout << "__________________________________________\n";
 }
-void showFinalGameResults(stGameResults gameResults)
+void printFinalGameResults(stGameResults& gameResults)
 {
-    cout << "Number of question      : " << gameResults.numberOfQuestion << "\n";
+    printGameOverScreenHeader(gameResults.finalResult);
+    cout << "Number of question      : " << gameResults.numberOfQuestions << "\n";
     cout << "Question level          : " << getQuestionLevel(gameResults.questionLevel) << "\n";
     cout << "Operation Type          : " << getOpTypeSymbol(gameResults.opType) << "\n";
     cout << "Number of right answers : " << gameResults.numberOfRightAnswers << "\n";
@@ -215,17 +209,16 @@ void showFinalGameResults(stGameResults gameResults)
 }
 void startGame()
 {
-    resetScreen();
-    short numberOfQuestions = readHowManyQuestions("How many questions do you want to answer ? ");
-    enQuestionLevel questionsLevel = readQuestionsLevel("Enter questions level [1] Easy, [2] Med, [3] Hard, [4] Mix ? ");
-    enOpType opType = readOpType("Enter operation type [1] Add, [2] Sub, [3] Mul, [4] Div, [5] Mix ? ");
-    stGameResults gameResults = playGame(numberOfQuestions, questionsLevel, opType);
-    showGameOverScreen(gameResults.finalResult);
-    showFinalGameResults(gameResults);
-    if (playAgain())
+    do
     {
-        startGame();
-    }
+        resetScreen();
+        stGameResults gameResults;
+        gameResults.numberOfQuestions = readHowManyQuestions();
+        gameResults.questionLevel = readQuestionsLevel();
+        gameResults.opType = readOpType();
+        playMathGame(gameResults);
+        printFinalGameResults(gameResults);
+    } while (playAgain());
 }
 int main()
 {
